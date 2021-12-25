@@ -1,26 +1,33 @@
-import React from 'react';
-import {useSelector} from "react-redux";
-import {Link} from "react-router-dom";
-import Author from "../user/author";
-import TimeAgo from "./TimeAgo";
-import Reaction from "./Reaction";
+import React, {useEffect} from 'react';
+import {useDispatch, useSelector} from "react-redux";
+import Post from "./post";
+import {fetchPosts} from "../../stateManagement/postsSlice";
 
 const PostLists = () => {
-    const postLists = useSelector((state) => state.posts)
+    const postStatus = useSelector(state => state.posts.status)
+    const postLists = useSelector((state) => state.posts.posts)
+    const dispatch = useDispatch()
+    let renderItem
 
+    if(postStatus === 'pending') {
+        renderItem = <h2>loading</h2>
+    } else if(postStatus === 'succeed') {
     const orderedLists = postLists.slice().sort((a,b) => b.date.localeCompare(a.date))
-    const renderedPosts = orderedLists.map((post)=> ( <article className="post-excerpt" key={post.id}>
-        <h3>{post.title}  </h3>
-        <Author authorId={post.authorId}/>
-        <TimeAgo timestamp={post.date} />
-        <p className="post-content">{post.content.substring(0, 100)}</p>
-        <Link to={`view-post/${post.id}`} >View Post</Link>
-        <Reaction postId={post.id}/>
-    </article>))
+        renderItem = orderedLists.map(post => <Post key={post.id} post={post} />)
+    } else if(postStatus === 'error') {
+        renderItem = <h4>Error while fetching the posts</h4>
+    }
+
+
+    useEffect(() => {
+        if(postStatus === 'idle') dispatch(fetchPosts())
+    },[postStatus, dispatch])
+
+
     return (
         <section className="posts-list">
             <h2>Posts</h2>
-            {renderedPosts}
+            {renderItem}
         </section>
     );
 };

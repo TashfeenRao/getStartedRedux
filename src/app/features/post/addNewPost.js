@@ -1,28 +1,40 @@
 import React, {useState} from 'react';
 import {useDispatch, useSelector} from "react-redux";
-import {postAdded} from "../../stateManagement/postsSlice";
+import { saveNewPostToDb} from "../../stateManagement/postsSlice";
 
 const AddNewPost = () => {
     const [title, setTitle] = useState('')
     const [detail, setDetail] = useState('')
     const [authorId, setAuthorId] = useState('')
-    const users = useSelector(state => state.users)
+    const [postStatus, setPostStatus] = useState('idle')
+    const users = useSelector(state => state.users.users)
     const dispatch = useDispatch()
     const onTitleChange = (e) => setTitle(e.target.value)
     const onDetailChange = (e) => setDetail(e.target.value)
     const onAuthorSelect = (e) => setAuthorId(e.target.value)
 
-    const postSubmitted = () => {
-        if (title && detail && authorId) {
-            dispatch(postAdded(title, detail, authorId))
-            setTitle('')
-            setDetail('')
-            setAuthorId('')
+    const postSubmitted = async () => {
+        try {
+            setPostStatus('pending')
+            if (canSave) {
+               await dispatch(saveNewPostToDb({
+                    title,
+                    content: detail,
+                    user: authorId
+                }))
+                setPostStatus('succeed')
+                setTitle('')
+                setDetail('')
+                setAuthorId('')
+            }
+        } catch (e) {
+            console.log("error in saving post",e)
+        } finally {
+            setPostStatus('idle')
         }
-
     }
 
-    const canSave = Boolean(title) && Boolean(detail) && Boolean(authorId)
+    const canSave = [title, detail, authorId].every(Boolean) && postStatus === 'idle'
 
     const authorOptions = users.map((user) => <option key={user.id} value={user.id}>{user.name}</option>)
     return (

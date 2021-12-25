@@ -5,8 +5,8 @@ import {useHistory} from "react-router-dom";
 
 const EditPost = ({match}) => {
     const {postId} = match.params
-    const post = useSelector(state => state.posts.find(post => post.id === postId))
-    const [title, setTitle] = useState(post.id)
+    const post = useSelector(state => state.posts.posts.find(post => post.id === postId))
+    const [title, setTitle] = useState(post.title)
     const [content, setContent] = useState(post.content)
     const onTitleChange = (e) => setTitle(e.target.value)
     const onDetailChange = (e) => setContent(e.target.value)

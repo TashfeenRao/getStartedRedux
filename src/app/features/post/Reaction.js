@@ -11,7 +11,7 @@ const reactionEmoji = {
 }
 
 const Reaction = ({postId}) => {
-    const post = useSelector(state => state.posts.find(post => post.id === postId))
+    const post = useSelector(state => state.posts.posts.find(post => post.id === postId))
     const dispatch = useDispatch()
     const handleReaction = (postId, name) => dispatch(updateReaction(postId, name))
 

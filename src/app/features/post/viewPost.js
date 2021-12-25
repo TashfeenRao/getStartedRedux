@@ -5,7 +5,7 @@ import TimeAgo from "./TimeAgo";
 
 const ViewPost = ({match}) => {
     const {postId} = match.params
-    const post = useSelector(state => state.posts.find(post => post.id === postId))
+    const post = useSelector(state => state.posts.posts.find(post => post.id === postId))
     return (
         <section>
             <article className="post">
