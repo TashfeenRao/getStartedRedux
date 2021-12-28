@@ -1,11 +1,11 @@
 import React, {useState} from 'react';
 import {useDispatch, useSelector} from "react-redux";
-import { updatePost} from "../../stateManagement/postsSlice";
+import {selectPostById, updatePost} from "../../stateManagement/postsSlice";
 import {useHistory} from "react-router-dom";
 
 const EditPost = ({match}) => {
     const {postId} = match.params
-    const post = useSelector(state => state.posts.posts.find(post => post.id === postId))
+    const post = useSelector(state => selectPostById(state, postId))
     const [title, setTitle] = useState(post.title)
     const [content, setContent] = useState(post.content)
     const onTitleChange = (e) => setTitle(e.target.value)

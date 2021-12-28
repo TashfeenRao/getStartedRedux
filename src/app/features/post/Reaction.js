@@ -1,6 +1,6 @@
 import React from 'react';
 import {useDispatch, useSelector} from "react-redux";
-import {updateReaction} from "../../stateManagement/postsSlice";
+import {selectPostById, updateReaction} from "../../stateManagement/postsSlice";
 
 const reactionEmoji = {
     thumbsUp: '👍',
@@ -11,7 +11,7 @@ const reactionEmoji = {
 }
 
 const Reaction = ({postId}) => {
-    const post = useSelector(state => state.posts.posts.find(post => post.id === postId))
+    const post = useSelector(state => selectPostById(state, postId))
     const dispatch = useDispatch()
     const handleReaction = (postId, name) => dispatch(updateReaction(postId, name))
 

@@ -1,13 +1,15 @@
 import React, {useState} from 'react';
 import {useDispatch, useSelector} from "react-redux";
 import { saveNewPostToDb} from "../../stateManagement/postsSlice";
+import {selectAllUsers} from "../../stateManagement/usersSlice";
 
 const AddNewPost = () => {
     const [title, setTitle] = useState('')
     const [detail, setDetail] = useState('')
     const [authorId, setAuthorId] = useState('')
     const [postStatus, setPostStatus] = useState('idle')
-    const users = useSelector(state => state.users.users)
+    const users = useSelector(selectAllUsers)
+
     const dispatch = useDispatch()
     const onTitleChange = (e) => setTitle(e.target.value)
     const onDetailChange = (e) => setDetail(e.target.value)

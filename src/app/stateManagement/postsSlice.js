@@ -1,4 +1,4 @@
-import {createSlice, nanoid} from "@reduxjs/toolkit";
+import {createEntityAdapter, createSlice, nanoid} from "@reduxjs/toolkit";
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import {client} from "../../api/client";
 
@@ -31,11 +31,20 @@ import {client} from "../../api/client";
 //         }
 //     }]
 
-const initialState = {
-    posts: [],
+// const initialState = {
+//     posts: [],
+//     status: 'idle',
+//     error: null
+// }
+
+const postsAdapter = createEntityAdapter({
+    sortComparer: (a,b) => b.date.localeCompare(a.date)
+})
+
+const initialState = postsAdapter.getInitialState({
     status: 'idle',
     error: null
-}
+})
 
 export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
     const response = await client.get('/fakeapi/posts')
@@ -74,7 +83,7 @@ const postsSlice = createSlice({
         },
         updatePost: (state, action) => {
             const {id, title, content} = action.payload
-            const existingPost = state.posts.find(post => post.id === id)
+            const existingPost = state.entities[id]
             if (existingPost) {
                 existingPost.title = title
                 existingPost.content = content
@@ -83,7 +92,7 @@ const postsSlice = createSlice({
         updateReaction: {
             reducer(state, action) {
                 const {postId, name} = action.payload
-                const existingPost = state.posts.find(post => post.id === postId)
+                const existingPost = state.entities[postId]
                 if (existingPost) {
                     existingPost.reactions[name]++
                 }
@@ -98,21 +107,31 @@ const postsSlice = createSlice({
             }
         }
     },
-    extraReducers(builder) {
-        builder.addCase(fetchPosts.pending, (state) => {
+    extraReducers: {
+        [fetchPosts.pending]: (state) => {
             state.status = 'pending'
 
-        }).addCase(fetchPosts.fulfilled, (state, action) => {
+        },
+        [fetchPosts.fulfilled]: (state, action) => {
             state.status = 'succeed';
-            state.posts = state.posts.concat(action.payload)
-        }).addCase(fetchPosts.rejected, (state, action) => {
+            postsAdapter.upsertMany(state, action.payload)
+           // state.posts = state.posts.concat(action.payload)
+        },
+        [fetchPosts.rejected]: (state, action) => {
             state.status = 'error'
             state.error = action.payload
-        })
-        builder.addCase(saveNewPostToDb.fulfilled, (state, action) => {
-            state.posts.push(action.payload)
-        })
+        },
+
+        [saveNewPostToDb.fulfilled]: (state, action) =>  postsAdapter.addOne(state, action.payload)
     }
 })
+
+export const {
+    selectAll: selectAllPosts,
+    selectById: selectPostById,
+    selectIds: selectPostIds
+} = postsAdapter.getSelectors(state => state.posts)
+
+//export const selectAllPosts = state => state.posts.posts
 export const {addPost, postAdded, updatePost, updateReaction} = postsSlice.actions
 export default postsSlice.reducer
