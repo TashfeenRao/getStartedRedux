@@ -1,6 +1,7 @@
-import {createAsyncThunk, createEntityAdapter, createSlice} from "@reduxjs/toolkit";
+import {createAsyncThunk, createEntityAdapter, createSelector, createSlice} from "@reduxjs/toolkit";
 import {client} from "../../api/client";
 import {selectAllPosts} from "./postsSlice";
+import {apiSlice} from "./apiSlice";
 
 
 // const initialState = {
@@ -21,39 +22,46 @@ export const fetchUsers = createAsyncThunk('users/fetch', async () => {
     return response.data
 })
 
-const usersSlice = createSlice({
-    name: "users",
-    initialState,
-    reducers: {},
-    extraReducers: {
-        [fetchUsers.pending]:  (state) => {
-            state.status = 'pending'
-        },
-        [fetchUsers.fulfilled]: (state, action) => {
-            state.status = 'succeed';
-            usersAdapter.upsertMany(state, action.payload)
-            //state.users = state.users.concat(action.payload)
-        },
-        [fetchUsers.rejected]: (state, action) => {
-            state.status = 'error';
-            state.error = action.payload
-        }
-    }
-})
+const allUsersResult = apiSlice.endpoints.getUsers.select()
 
-export default usersSlice.reducer
+const emptyUsers = []
+export const selectAllUsers = createSelector(allUsersResult, usersResult => usersResult?.data ?? emptyUsers)
+export const selectUser = createSelector(selectAllUsers, (state, userId) => userId, (users, userId) => users.find(user => user.id === userId))
 
-export const {
-    selectAll: selectAllUsers,
-    selectIds: selectAllUserIds,
-    selectById: selectUser,
-} = usersAdapter.getSelectors(state => state.users)
+//
+// const usersSlice = createSlice({
+//     name: "users",
+//     initialState,
+//     reducers: {},
+//     extraReducers: {
+//         [fetchUsers.pending]: (state) => {
+//             state.status = 'pending'
+//         },
+//         [fetchUsers.fulfilled]: (state, action) => {
+//             state.status = 'succeed';
+//             usersAdapter.upsertMany(state, action.payload)
+//             //state.users = state.users.concat(action.payload)
+//         },
+//         [fetchUsers.rejected]: (state, action) => {
+//             state.status = 'error';
+//             state.error = action.payload
+//         }
+//     }
+// })
+//
+// export default usersSlice.reducer
+//
+// export const {
+//     selectAll: selectAllUsers,
+//     selectIds: selectAllUserIds,
+//     selectById: selectUser,
+// } = usersAdapter.getSelectors(state => state.users)
 
 // export const selectAllUsers = state => state.users.users
 //
- export const userAllPosts = (state, userId) => {
-    const posts = selectAllPosts(state)
-    return posts.filter((post) => post.user === userId)
-}
+// export const userAllPosts = (state, userId) => {
+//     const posts = selectAllPosts(state)
+//     return posts.filter((post) => post.user === userId)
+//}
 //
 // export const selectUser = (state, userId) => state.users.users.find((user) => user.id === userId)

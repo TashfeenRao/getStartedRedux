@@ -6,7 +6,7 @@ import {fetchAllNotifications} from "../../stateManagement/notificationsSlice";
 
 const UserPage = ({match}) => {
     const {userId} = match.params
-    const posts = useSelector(state => userAllPosts(state, userId))
+    const posts = []//useSelector(state => userAllPosts(state, userId))
     const user = useSelector(state => selectUser(state, userId))
     const dispatch = useDispatch()
     const fetchNotifications = () => {

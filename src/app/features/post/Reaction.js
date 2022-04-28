@@ -10,13 +10,14 @@ const reactionEmoji = {
     eyes: '👀'
 }
 
-const Reaction = ({postId}) => {
-    const post = useSelector(state => selectPostById(state, postId))
+const Reaction = ({post}) => {
+    //const post = useSelector(state => selectPostById(state, postId))
     const dispatch = useDispatch()
     const handleReaction = (postId, name) => dispatch(updateReaction(postId, name))
 
-    const emojiButtons = Object.entries(reactionEmoji).map(([name,emoji]) => {
-        return <button onClick={() => handleReaction(postId, name)} key={name} type="button" className="muted-button reaction-button">{emoji} {post.reactions[name]}</button>
+    const emojiButtons = Object.entries(reactionEmoji).map(([name, emoji]) => {
+        return <button onClick={() => handleReaction(post.id, name)} key={name} type="button"
+                       className="muted-button reaction-button">{emoji} {post.reactions[name]}</button>
     })
     return (
         <div>

@@ -2,14 +2,16 @@ import React, {useState} from 'react';
 import {useDispatch, useSelector} from "react-redux";
 import { saveNewPostToDb} from "../../stateManagement/postsSlice";
 import {selectAllUsers} from "../../stateManagement/usersSlice";
+import {useAddNewPostMutation} from "../../stateManagement/apiSlice";
+import {Spinner} from "../../../components/Spinner";
 
 const AddNewPost = () => {
+    const [addNewPost, {isLoading}] = useAddNewPostMutation()
     const [title, setTitle] = useState('')
     const [detail, setDetail] = useState('')
     const [authorId, setAuthorId] = useState('')
     const [postStatus, setPostStatus] = useState('idle')
     const users = useSelector(selectAllUsers)
-
     const dispatch = useDispatch()
     const onTitleChange = (e) => setTitle(e.target.value)
     const onDetailChange = (e) => setDetail(e.target.value)
@@ -19,12 +21,13 @@ const AddNewPost = () => {
         try {
             setPostStatus('pending')
             if (canSave) {
-               await dispatch(saveNewPostToDb({
-                    title,
-                    content: detail,
-                    user: authorId
-                }))
-                setPostStatus('succeed')
+               // await dispatch(saveNewPostToDb({
+               //      title,
+               //      content: detail,
+               //      user: authorId
+               //  }))
+               //  setPostStatus('succeed')
+                await addNewPost({title, content: detail, user: authorId}).unwrap()
                 setTitle('')
                 setDetail('')
                 setAuthorId('')
@@ -36,9 +39,10 @@ const AddNewPost = () => {
         }
     }
 
-    const canSave = [title, detail, authorId].every(Boolean) && postStatus === 'idle'
-
+    const canSave = [title, detail, authorId].every(Boolean) && postStatus === 'idle' && !isLoading
     const authorOptions = users.map((user) => <option key={user.id} value={user.id}>{user.name}</option>)
+
+    if(isLoading) return <Spinner text="loading" />
     return (
         <section>
             <h2>Add New Post</h2>
@@ -54,7 +58,6 @@ const AddNewPost = () => {
                 </select>
                 <button type="button" onClick={postSubmitted} disabled={!canSave}>Add Post</button>
             </form>
-
         </section>
     );
 };
